@@ -1,3 +1,12 @@
 .slider-container{
-    display: inline-flex;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.slider-item{
+    /* transform: translateX(-50%); */
+    width: 33%;
+    flex: 0 0 auto;
 }
