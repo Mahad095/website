@@ -15,7 +15,7 @@ export default function Navbar() {
     <React.Fragment>
       <div className="container-fluid nav_bg">
         <div className="row">
-          <div className="col-11 mx-auto">
+          <div className="col-12">
 
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
               <div className="container-fluid">
