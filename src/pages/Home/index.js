@@ -2,6 +2,10 @@ import React from 'react'
 import './index.css'
 import ComputerBoy from '../../assets/svg/ComputerBoy'
 import Slider from '../../components/Slider'
+import chicks from "../../assets/img/chicks.jpg"
+import tiger from "../../assets/img/tiger.jpg"
+import sheep from "../../assets/img/sheep.jpg"
+import parrots from "../../assets/img/parrots.jpg"
 export default function Home() {
   return (
       <React.Fragment>
@@ -23,7 +27,12 @@ export default function Home() {
             </div>
           </div>
         </section>
-        <Slider/>
+        <Slider height="200px">
+          <img src={chicks} alt="a group of chickens"/>
+          <img src={tiger} alt="a tiger"/>
+          <img src={parrots} alt="two parrots"/>
+          <img src={sheep} alt="a sheep"/>
+        </Slider>
       </React.Fragment>
   )
 }

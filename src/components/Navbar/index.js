@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <React.Fragment>
-      <div className="container-fluid nav_bg">
+      <div className="container-fluid nav_bg mt-1">
         <div className="row">
           <div className="col-12">
 
