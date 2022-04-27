@@ -7,7 +7,7 @@
     align-items: center;
     width: 98%;
     margin-bottom: 1em;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .slider-item{

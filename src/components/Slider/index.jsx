@@ -10,7 +10,7 @@ export default function Slider(props) {
     }
     return (
     <React.Fragment>
-        <div className= {"shadow-lg bg-white rounded slider-container " + props.className} style={{height:`${props.height}`}}>
+        <div className= {"slider-container " + props.className} style={{height:`${props.height}`}}>
             <button className='btn btn-primary navigators left' onClick={()=>slide(1)}>&lt;</button>
 
             {

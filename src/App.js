@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Projects from "./pages/Projects";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import GameOfLife from './pages/Projects/GameOfLife'
 function App() {
   return (
       <Router>
@@ -14,6 +15,8 @@ function App() {
             <Routes>
               <Route path='/' element = {<Home/>} />
               <Route path='/Projects' element = {<Projects/>} />
+              <Route path='/Projects/GameOfLife' element = {<GameOfLife/>} />
+              
               <Route path='/Contact' element = {<Contact/>} />
               <Route path='/About' element = {<About/>} />
               <Route path= "*" element={<Navigate to ="/" />}/>

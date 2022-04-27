@@ -6,6 +6,7 @@ import chicks from "../../assets/img/chicks.jpg"
 import tiger from "../../assets/img/tiger.jpg"
 import sheep from "../../assets/img/sheep.jpg"
 import parrots from "../../assets/img/parrots.jpg"
+import Footer from '../../components/Footer/Footer'
 export default function Home() {
   return (
       <React.Fragment>
@@ -22,12 +23,12 @@ export default function Home() {
                 <button className="btn btn-outline-dark" style={{borderRadius:"01.25rem"}}>Hop on</button>
               </div>
               <div className="col-md-6 my-auto">
-                <ComputerBoy  className="mw-100 my-auto"/>
+                <ComputerBoy className="d-none d-md-block"/>
               </div>
             </div>
           </div>
         </section>
-        <Slider height="200px">
+        <Slider height="200px" className="shadow-lg bg-white rounded">
           <img src={chicks} alt="a group of chickens"/>
           <img src={tiger} alt="a tiger"/>
           <img src={parrots} alt="two parrots"/>
