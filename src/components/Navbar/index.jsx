@@ -6,7 +6,7 @@ export default function Navbar() {
   const pages = [
     {name:"Home", path: "/"},
     {name:"Projects", path: "/Projects"},
-    {name:"About", path: "/About"},
+    // {name:"About", path: "/About"},
     {name:"Contact", path: "/Contact"},
   ];
 

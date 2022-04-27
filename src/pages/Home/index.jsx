@@ -1,39 +1,57 @@
 import React from 'react'
 import './index.css'
 import ComputerBoy from '../../assets/svg/ComputerBoy'
+import LookAtBoardBoy from '../../assets/svg/LookAtBoardBoy'
 import Slider from '../../components/Slider'
 import chicks from "../../assets/img/chicks.jpg"
 import tiger from "../../assets/img/tiger.jpg"
 import sheep from "../../assets/img/sheep.jpg"
 import parrots from "../../assets/img/parrots.jpg"
 import Footer from '../../components/Footer/Footer'
+import { NavLink } from 'react-router-dom'
 export default function Home() {
   return (
       <React.Fragment>
         <section>
           <div className="container-fluid">
-            <div className="row justify-content-center">
-              <div className="col-md-6 my-auto py-5">
-                <h1 className="col-md-10 order-2 order-lg-1">
+            <div className="row justify-content-center text-center align-items-center text-md-start">
+              <div className="col-12 col-md-6 py-5">
+                <h1 className="display-4">
                   Student by day,<br/> coder by night
                 </h1>
-                <p className='my-4'>
-                  Hello, Mahad here. Im a student from Pakistan. Join me as i go through my Coding journey.
+                <p className='my-4 text-secondary'>
+                  A student from Pakistan with a passion for coding. Hop along with me on my journey to become a master of web development.
+                  {/* Hello, Mahad here. Im a student from Pakistan. Join me as i go through my Coding journey. */}
                 </p>
-                <button className="btn btn-outline-dark" style={{borderRadius:"01.25rem"}}>Hop on</button>
+                <button className="btn btn-primary" style={{borderRadius:"01.25rem"}}>Take a peek</button>
               </div>
-              <div className="col-md-6 my-auto">
-                <ComputerBoy className="d-none d-md-block"/>
+              <div className="col-9 col-md-6">
+                <ComputerBoy/>
               </div>
             </div>
           </div>
         </section>
-        <Slider height="200px" className="shadow-lg bg-white rounded">
+        <Slider height="300px">
           <img src={chicks} alt="a group of chickens"/>
           <img src={tiger} alt="a tiger"/>
           <img src={parrots} alt="two parrots"/>
           <img src={sheep} alt="a sheep"/>
         </Slider>
+        <section>
+          <div className="container-lg py-4 my-2 shadow-lg rounded">
+            <div className="row justify-content-center">
+              <div className="col-md-5 p-3 text-center text-md-start">
+                <h1>Who Am I?</h1>
+                <p className='text-secondary my-4'>Hello! My name is <strong>Mahad Hameed</strong>. I am a student of computer science, based in Pakistan. I started my coding journey in 2020. All my life, I was uncertain about what I wanted to do with my life. But now I can say with absolute certainty that I have finally found my passion.</p>
+                <NavLink className="btn btn-primary" to="/Contact">Contact Me!</NavLink>
+              </div>
+                <div className="col-sm-5 col-md-4 col-lg-3">
+                  <LookAtBoardBoy/>
+                </div>
+            </div>      
+          </div>
+        </section>
+
       </React.Fragment>
   )
 }
