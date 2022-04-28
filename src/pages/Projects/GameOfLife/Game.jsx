@@ -72,24 +72,37 @@ function Game(props) {
         cell.current.setactive(secondary[i][j]);
     }));
   }
-
   const animator = new Animator(2, nextGeneration);
+
+  const clearBoard = () =>{
+    animator.stop();
+    cells.map(item =>
+      item.map(subItem =>
+        subItem.current.setactive(false)
+        )
+    );
+  }  
   
   return (
     <React.Fragment>
-      <div className={props.className + " board"}>
-        <div className="grid" style = {{gridTemplateColumns: `repeat(${n}, 1fr)`}}>
-            {
-              cells.map((item, i)=>
-                item.map((subItem, j)=>
-                  <Cell ref={subItem}/>
-                  )
-              )
-            }
+      <div className="container-lg">
+        <div className="row">
+          <div className="col d-flex justify-content-center">
+            <div className="grid" style = {{gridTemplateColumns: `repeat(${n}, 1fr)`}}>
+              {
+                cells.map(item =>
+                  item.map(subItem =>
+                    <Cell ref={subItem}/>
+                    )
+                )
+              }
+            </div>
+          </div>
         </div>
-        <div className="controller">
-          <button onClick={()=>animator.start()}>Start</button>
-          <button onClick={()=>animator.stop()}>Stop</button>
+        <div className="row my-3 d-flex justify-content-around">
+            <button className="col-3 btn btn-primary" onClick={()=>animator.start()}>Start</button>
+            <button className="col-3 btn btn-primary" onClick={()=>animator.stop()}>Stop</button>
+            <button className="col-3 btn btn-primary" onClick={clearBoard}>Clear</button>
         </div>
       </div>
 

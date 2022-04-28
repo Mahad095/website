@@ -31,12 +31,14 @@ export default function Home() {
             </div>
           </div>
         </section>
+        
         <Slider height="300px">
           <img src={chicks} alt="a group of chickens"/>
           <img src={tiger} alt="a tiger"/>
           <img src={parrots} alt="two parrots"/>
           <img src={sheep} alt="a sheep"/>
         </Slider>
+
         <section id="about">
           <div className="container-lg py-4 my-2">
             <div className="row justify-content-around align-items-center">
