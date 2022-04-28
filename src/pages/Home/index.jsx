@@ -12,10 +12,10 @@ import { NavLink } from 'react-router-dom'
 export default function Home() {
   return (
       <React.Fragment>
-        <section>
-          <div className="container-fluid">
+        <section id="hero">
+          <div className="container-lg py-4 my-2">
             <div className="row justify-content-center text-center align-items-center text-md-start">
-              <div className="col-12 col-md-6 py-5">
+              <div className="col-sm-10 col-md-6 py-5">
                 <h1 className="display-4">
                   Student by day,<br/> coder by night
                 </h1>
@@ -23,7 +23,7 @@ export default function Home() {
                   A student from Pakistan with a passion for coding. Hop along with me on my journey to become a master of web development.
                   {/* Hello, Mahad here. Im a student from Pakistan. Join me as i go through my Coding journey. */}
                 </p>
-                <button className="btn btn-primary" style={{borderRadius:"01.25rem"}}>Take a peek</button>
+                <NavLink className="btn btn-primary" to="/Projects">Take a peek!</NavLink>
               </div>
               <div className="col-9 col-md-6">
                 <ComputerBoy/>
@@ -37,13 +37,15 @@ export default function Home() {
           <img src={parrots} alt="two parrots"/>
           <img src={sheep} alt="a sheep"/>
         </Slider>
-        <section>
-          <div className="container-lg py-4 my-2 shadow-lg rounded">
-            <div className="row justify-content-center">
-              <div className="col-md-5 p-3 text-center text-md-start">
+        <section id="about">
+          <div className="container-lg py-4 my-2">
+            <div className="row justify-content-around align-items-center">
+              <div className="col-sm-10 col-md-5 p-3 text-center text-md-start">
                 <h1>Who Am I?</h1>
                 <p className='text-secondary my-4'>Hello! My name is <strong>Mahad Hameed</strong>. I am a student of computer science, based in Pakistan. I started my coding journey in 2020. All my life, I was uncertain about what I wanted to do with my life. But now I can say with absolute certainty that I have finally found my passion.</p>
-                <NavLink className="btn btn-primary" to="/Contact">Contact Me!</NavLink>
+                <h1>What I do?</h1>
+                <p className="text-secondary my-4">I am a full time student. But, in my free time, I strive to make fun, beautiful, and useful applications. Feel free to interact with them.</p>
+                <NavLink className="btn btn-primary" to="/Projects">Take a peek!</NavLink>
               </div>
                 <div className="col-sm-5 col-md-4 col-lg-3">
                   <LookAtBoardBoy/>
