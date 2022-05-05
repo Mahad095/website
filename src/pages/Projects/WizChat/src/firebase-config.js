@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp } from 'firebase/app';
+import { collection, getFirestore } from 'firebase/firestore';
 const firebaseConfig = {
 
     apiKey: "AIzaSyC2otW3kb7ttK1U1_x8krx05bwYHAhf5Y4",  
@@ -10,9 +10,7 @@ const firebaseConfig = {
     appId: "1:458252889163:web:6e95b159a9c43f3b80f1ce",
     measurementId: "G-GK93Y535GN"
 };
-  
-  
-  // Initialize Firebase
-  
-  const app = initializeApp(firebaseConfig);
-  export const auth = getAuth(app);
+
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore();
+export const messages = collection(db, 'messages');
