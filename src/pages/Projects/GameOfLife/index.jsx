@@ -1,5 +1,5 @@
 import React from 'react'
-import Game from './Game'
+import Game from './src/Game'
 export default function GameOfLife() {
   return (
     <React.Fragment>

@@ -5,9 +5,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-do
 import Layout from "./Layout";
 import Home from "./pages/Home";
 import Projects from "./pages/Projects";
-import Contact from "./pages/Contact";
-import About from "./pages/About";
 import GameOfLife from './pages/Projects/GameOfLife'
+import WizChat from './pages/Projects/WizChat'
 function App() {
   return (
       <Router>
@@ -16,9 +15,7 @@ function App() {
               <Route path='/' element = {<Home/>} />
               <Route path='/Projects' element = {<Projects/>} />
               <Route path='/Projects/GameOfLife' element = {<GameOfLife/>} />
-              
-              <Route path='/Contact' element = {<Contact/>} />
-              <Route path='/About' element = {<About/>} />
+              <Route path='/Projects/WizChat' element = {<WizChat/>} />
               <Route path= "*" element={<Navigate to ="/" />}/>
             </Routes>
         </Layout>

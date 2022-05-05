@@ -29,28 +29,36 @@ function Game(props) {
       secondary[i][j] = false;
     }
   }
-
   const countNeighbours = (i, j)=>
   {
     let count = 0;
-    
-    if(cells[i - 1][j - 1].current.getactive()) count++;
-    if(cells[i - 1][j].current.getactive()) count++;
-    if(cells[i - 1][j + 1].current.getactive()) count++;
-    if(cells[i][j - 1].current.getactive()) count++;
-    if(cells[i][j + 1].current.getactive()) count++;
-    if(cells[i + 1][j - 1].current.getactive()) count++;
-    if(cells[i + 1][j].current.getactive()) count++;
-    if(cells[i + 1][j + 1].current.getactive()) count++;
+    const index = (arr, i, j, X, Y) =>
+    {
+      let x = i
+      let y = j 
+      if(i < 0) x= X + i
+      else x = i % X
+      if(j < 0) y= Y + j
+      else y = j % Y 
+      return arr[x][y]
+    } 
+    if(index(cells, i - 1, j - 1, n, n).current.getactive()) count++
+    if(index(cells, i - 1, j, n, n).current.getactive()) count++
+    if(index(cells, i - 1, j + 1, n, n).current.getactive()) count++
+    if(index(cells, i, j - 1, n, n).current.getactive()) count++
+    if(index(cells, i, j + 1, n, n).current.getactive()) count++
+    if(index(cells, i + 1, j - 1, n, n).current.getactive()) count++
+    if(index(cells, i + 1, j, n, n).current.getactive()) count++
+    if(index(cells, i + 1, j + 1, n, n).current.getactive()) count++
     return count;
   }
 
   const nextGeneration = ()=>
   {
 
-    for(let i = 1 ; i < n - 1 ; i++)
+    for(let i = 1 ; i < n ; i++)
     {
-      for(let j = 1 ; j < n - 1  ; j++)
+      for(let j = 1 ; j < n  ; j++)
       {
         let count = countNeighbours(i, j);
         if(cells[i][j].current.getactive())
