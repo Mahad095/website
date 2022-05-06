@@ -1,49 +1,49 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
 import {messages} from './firebase-config';
-import { addDoc, getDocs, Timestamp } from 'firebase/firestore';
+import { addDoc, onSnapshot, serverTimestamp, query, orderBy } from 'firebase/firestore';
 
 export default function Chat() {
     const [message, setmessage] = useState("");
+    const [list, setlist] = useState([])
     useEffect(()=>
     {
-        // getDocs(messages)
-        //     .then((snapshot) => 
-        //     {
-        //         snapshot.docs.forEach((doc)=>
-        //         {
-        //             data.push({...doc.data(), id:doc.id});
-        //         })
-        //         console.log(data);
-        //     }).catch(err=>console.log(err.message));
+        const q = query(messages, orderBy("createdAt", "asc"));
+        const unsubscribe = onSnapshot(q, (snapshot) => 
+        {
+            let data = []
+            snapshot.docs.forEach((doc)=>
+            {
+                    data.push({...doc.data(), id:doc.id});
+            })
+            setlist(data);
+        });
+        return unsubscribe;
     }, []
-    )
-
-    const signUp = ()=>
+    );
+    const submitMessage = ()=>
     {
             addDoc(messages, 
                 {
                     message: message,
-                    date:Timestamp.now(),
+                    createdAt: serverTimestamp(),
                 }
-                ).then(()=>{setmessage("")})
-                
-            // const user = signInWithPopup(auth, new GoogleAuthProvider())
-            // .then(val=>console.log(val));
-    }
-
-    const signIn = ()=>
-    {
-        
-    }
-    const signOut = ()=>
-    {
-        
+                )
+                    .then(()=>{setmessage("")})
+                    .catch(err=>console.log(err.message));
     }
     return (
         <React.Fragment>
             <input type="text" value={message} onChange={(event)=>setmessage(event.target.value)}/>
-            <button className='btn btn-primary' onClick={signUp}>Submit</button>
+            <button className='btn btn-primary' onClick={submitMessage}>Submit</button>
+            <ul>
+            {
+                list.map(item => 
+                <li>
+                    {item.message}
+                </li>)
+            }
+            </ul>
         </React.Fragment>
     )
 }
