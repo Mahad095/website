@@ -1,0 +1,5 @@
+.msg{
+    width: fit-content;
+    max-width: 50%;
+    overflow-wrap:break-word;
+}

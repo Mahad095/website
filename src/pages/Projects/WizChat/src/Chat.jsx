@@ -58,14 +58,15 @@
 
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { auth, db } from './firebase-config';
-import { onSnapshot, query, collection, orderBy } from 'firebase/firestore';
-
+import { onSnapshot, query, collection, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import './Chat.css'
 const messages = collection(db, "messages");
 
 const UserCredential = ()=> 
 {
+    const [name, setname] = useState("");
     const [email, setemail] = useState("");
     const [pass, setpass] = useState("");
     
@@ -105,6 +106,12 @@ const UserCredential = ()=>
             .then((userCred)=> 
             {
                 console.log(userCred);
+                updateProfile(auth.currentUser, 
+                    {
+                        displayName : name
+                    })
+                        .then(()=>console.log(userCred))
+                        .catch((err)=>console.log(err.message));
             })   
             .catch((err) => 
             {
@@ -129,6 +136,19 @@ const UserCredential = ()=>
     return (
     <React.Fragment>
         <div className="container-lg">
+            <div className="row">
+                <div className="col-md-6">
+                    <input 
+                        type="text" 
+                        value = {name} 
+                        onChange = {(e)=>setname(e.target.value)} 
+                        className="form-control my-3" 
+                        placeholder="Username" 
+                        aria-label="username" 
+                        aria-describedby="basic-addon1"
+                    />
+                </div>
+            </div>
             <div className="row">
                 <div className="col-md-6">
                     <input 
@@ -161,14 +181,29 @@ const UserCredential = ()=>
     )
 }
 
+
+
 export default function Chat() {
     const [user, setuser] = useState(null);
     const [msgList, setmsgList] = useState([]);
+    const [msg, setmsg] = useState("");
     const SignOut = ()=> 
     {
         signOut(auth)
             .then(()=>console.log("User Signed out"))
             .catch((err)=>console.log(err.message));
+    }
+    const AddMessage = ()=>
+    {
+            addDoc(messages, 
+                {
+                    message: msg,
+                    name: auth.currentUser.displayName,
+                    createdAt: serverTimestamp(),
+                }
+                )
+                    .then(()=>{setmsg("")})
+                    .catch(err=>console.log(err.message));
     }
     useEffect( ()=>
         {
@@ -195,11 +230,32 @@ export default function Chat() {
         <React.Fragment>
             {user === null && <UserCredential/>}
             {user && 
-                <div className="container-lg">
-                    {
-                        msgList.map((msg, i)=><p key={i}>{msg.message}</p>)
-                    }
-                    <button type="button" className="me-1 btn btn-primary" onClick={SignOut}>SignOut</button>
+                <div className="container-fluid">
+                    <div className="row justify-content-center">
+                        <div className="col-md-6 border">
+                            {
+                                
+                                msgList.map((msg, i)=>
+                                <div key={i} className="py-2 my-3 shadow rounded msg">
+                                    <p className="mx-3 my-auto text-secondary"><strong>{msg.name}</strong></p>
+                                    <p className="mx-3 my-auto text-secondary">{msg.message}</p>
+                                </div>
+                                )
+                            }
+                            <div className="d-flex my-2">
+                                <input 
+                                    type="text" 
+                                    value = {msg} 
+                                    onChange = {(e)=>setmsg(e.target.value)} 
+                                    className="form-control" 
+                                    placeholder="Enter message." 
+                                    aria-label="write area" 
+                                    aria-describedby="basic-addon1"
+                                />
+                                <button type="button" className="mx-2 btn btn-primary" onClick={AddMessage}>Go</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
             }
