@@ -14,7 +14,7 @@
 //     const [list, setlist] = useState([])
 //     // useEffect(()=>
 //     // {
-//     //     const q = query(messages, orderBy("createdAt", "asc"));
+//     //     const q = query(messages, orderBy("createdAt", "asc"));c
 //     //     const unsubscribe = onSnapshot(q, (snapshot) => 
 //     //     {
 //     //         let data = []
@@ -57,26 +57,31 @@
 
 
 import React from 'react'
-import { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebase-config';
+import { useState, useEffect } from 'react'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth, db } from './firebase-config';
+import { onSnapshot, query, collection, orderBy } from 'firebase/firestore';
+
+const messages = collection(db, "messages");
+
 const UserCredential = ()=> 
 {
-    const [name, setname] = useState("");
+    const [email, setemail] = useState("");
     const [pass, setpass] = useState("");
+    
     const clearForm = () => 
     {
-        setname("");
+        setemail("");
         setpass("");
     }
+
     const SignIn = () =>
     {
-        signInWithEmailAndPassword(auth, name, pass)
+        signInWithEmailAndPassword(auth, email, pass)
             .then((userCred)=>
             {
                 console.log(userCred);
-            }
-        )
+            })
             .catch(err => 
             {
                 console.log(err);
@@ -85,11 +90,42 @@ const UserCredential = ()=>
                     case "auth/user-not-found":
                         alert("There are no users with this email.");
                         clearForm();
+                        break;
+                    case "auth/wrong-password":
+                        alert("You have entered the wrong password.");
+                        setpass("");
+                        break;
                 }
-            }
-        );
+            });
     }
 
+    const SignUp = () => 
+    {
+        createUserWithEmailAndPassword(auth, email, pass)
+            .then((userCred)=> 
+            {
+                console.log(userCred);
+            })   
+            .catch((err) => 
+            {
+                console.log(err);
+                switch(err.code)
+                {
+                    case "auth/invalid-email":
+                        alert("This email address is invalid.");
+                        setemail("");
+                        break;
+                    case "auth/weak-password":
+                        alert("The Password Should have at least 6 characters.");
+                        setpass("");
+                        break;               
+                    case "auth/email-already-in-use":
+                        alert("This email is already in use.");
+                        setemail("");
+                        break;    
+                }
+            });
+    }
     return (
     <React.Fragment>
         <div className="container-lg">
@@ -97,11 +133,11 @@ const UserCredential = ()=>
                 <div className="col-md-6">
                     <input 
                         type="text" 
-                        value = {name} 
-                        onChange = {(e)=>setname(e.target.value)} 
+                        value = {email} 
+                        onChange = {(e)=>setemail(e.target.value)} 
                         className="form-control" 
-                        placeholder="Username" 
-                        aria-label="Username" 
+                        placeholder="Example123@email.com" 
+                        aria-label="email" 
                         aria-describedby="basic-addon1"
                     />
                 </div>
@@ -119,16 +155,55 @@ const UserCredential = ()=>
                 </div>
             </div>          
             <button type="button" className="me-1 btn btn-primary" onClick={SignIn}>SignIn</button>
-            <button type="button" className="mx-1 btn btn-primary">Signup</button>
+            <button type="button" className="mx-1 btn btn-primary" onClick={SignUp}>Signup</button>
         </div>
     </React.Fragment>
     )
 }
 
 export default function Chat() {
-  return (
-      <React.Fragment>
-        <UserCredential/>
-    </React.Fragment>
-  )
+    const [user, setuser] = useState(null);
+    const [msgList, setmsgList] = useState([]);
+    const SignOut = ()=> 
+    {
+        signOut(auth)
+            .then(()=>console.log("User Signed out"))
+            .catch((err)=>console.log(err.message));
+    }
+    useEffect( ()=>
+        {
+            const unsubscribeAuth = onAuthStateChanged(auth, (user) => 
+            {
+                setuser(user);
+                console.log(user);
+            });    
+
+            const q = query(messages, orderBy("createdAt", "asc"));
+            const unsubscribeCollection = onSnapshot(q, (snapshot) => 
+            {
+                let data = []
+                snapshot.docs.forEach((doc)=>
+                {
+                        data.push({...doc.data(), id:doc.id});
+                })
+                setmsgList(data);
+            });
+            return () => {unsubscribeAuth(); unsubscribeCollection();}
+        }
+        ,[]);
+    return (
+        <React.Fragment>
+            {user === null && <UserCredential/>}
+            {user && 
+                <div className="container-lg">
+                    {
+                        msgList.map((msg, i)=><p key={i}>{msg.message}</p>)
+                    }
+                    <button type="button" className="me-1 btn btn-primary" onClick={SignOut}>SignOut</button>
+                </div>
+                
+            }
+            
+        </React.Fragment>
+    )
 }

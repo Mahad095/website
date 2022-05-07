@@ -19,7 +19,7 @@ export default function Navbar() {
 
             <nav className="navbar navbar-expand-lg navbar-light bg-light">
               <div className="container-fluid">
-                <h3 lassName="navbar-brand">CodeWizard</h3>
+                <h3 className="navbar-brand">CodeWizard</h3>
                 {/* <NavLink className="navbar-brand" to="/">CodeWizard</NavLink> */}
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                   <span className="navbar-toggler-icon" />
@@ -28,10 +28,10 @@ export default function Navbar() {
                   <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
                     
                     {
-                      pages.map(page=>
+                      pages.map((page, i)=>
                         
-                          <li className="nav-item">
-                            <NavLink className={({ isActive }) => (isActive? "menu_active": '') + " nav-link" } exact aria-current="page" to={page.path}>{page.name}</NavLink>
+                          <li className="nav-item" key={i}>
+                            <NavLink className={({ isActive }) => (isActive? "menu_active": '') + " nav-link" } aria-current="page" to={page.path}>{page.name}</NavLink>
                           </li>
                         )
                     }
