@@ -3,3 +3,15 @@
     max-width: 50%;
     overflow-wrap:break-word;
 }
+.chatBox{
+    height:90vh;
+    overflow-y: scroll;
+}
+.stickBottom{
+    position: sticky;
+    bottom: 0;
+}
+.stickTop{
+    position: sticky;
+    top: 0;
+}

@@ -1,62 +1,4 @@
-// import React from 'react';
-// import { useState, useEffect } from 'react';
-//  import { db, auth } from './firebase-config';
-
-//  import { addDoc, onSnapshot, serverTimestamp, query, orderBy, collection } from 'firebase/firestore';
-
-// const messages = collection(db, 'messages');
-
-
-
-
-// export default function Chat() {
-//     const [message, setmessage] = useState("");
-//     const [list, setlist] = useState([])
-//     // useEffect(()=>
-//     // {
-//     //     const q = query(messages, orderBy("createdAt", "asc"));c
-//     //     const unsubscribe = onSnapshot(q, (snapshot) => 
-//     //     {
-//     //         let data = []
-//     //         snapshot.docs.forEach((doc)=>
-//     //         {
-//     //                 data.push({...doc.data(), id:doc.id});
-//     //         })
-//     //         setlist(data);
-//     //     });
-//     //     return unsubscribe;
-//     // }, []
-//     // );
-//     const submitMessage = ()=>
-//     {
-//             addDoc(messages, 
-//                 {
-//                     message: message,
-//                     createdAt: serverTimestamp(),
-//                 }
-//                 )
-//                     .then(()=>{setmessage("")})
-//                     .catch(err=>console.log(err.message));
-//     }
-//     return (
-//         <React.Fragment>
-//             <input type="text" value={message} onChange={(event)=>setmessage(event.target.value)}/>
-//             <button className='btn btn-primary' onClick={submitMessage}>Submit</button>
-//             <ul>
-//             {
-//                 list.map(item => 
-//                 <li>
-//                     {item.message}
-//                 </li>)
-//             }
-//             </ul>
-//         </React.Fragment>
-//     )
-// }
-
-
-
-import React from 'react'
+import React, { useCallback, useRef } from 'react'
 import { useState, useEffect } from 'react'
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { auth, db } from './firebase-config';
@@ -195,15 +137,16 @@ export default function Chat() {
     }
     const AddMessage = ()=>
     {
-            addDoc(messages, 
-                {
-                    message: msg,
-                    name: auth.currentUser.displayName,
-                    createdAt: serverTimestamp(),
-                }
-                )
-                    .then(()=>{setmsg("")})
-                    .catch(err=>console.log(err.message));
+        if(msg.length === 0) return;
+        addDoc(messages, 
+            {
+                message: msg,
+                name: auth.currentUser.displayName,
+                createdAt: serverTimestamp(),
+            }
+            )
+                .then(()=>{setmsg("")})
+                .catch(err=>console.log(err.message));
     }
     useEffect( ()=>
         {
@@ -232,7 +175,10 @@ export default function Chat() {
             {user && 
                 <div className="container-fluid">
                     <div className="row justify-content-center">
-                        <div className="col-md-6 border">
+                        <div className="col-md-6 shadow chatBox">
+                            <div className="bg-primary py-2 stickTop">
+                                <p className="h5 text-white">User : {auth.currentUser?.displayName}</p>
+                            </div>
                             {
                                 
                                 msgList.map((msg, i)=>
@@ -242,7 +188,7 @@ export default function Chat() {
                                 </div>
                                 )
                             }
-                            <div className="d-flex my-2">
+                            <div className="d-flex mt-1 pb-1 stickBottom">
                                 <input 
                                     type="text" 
                                     value = {msg} 
@@ -252,7 +198,7 @@ export default function Chat() {
                                     aria-label="write area" 
                                     aria-describedby="basic-addon1"
                                 />
-                                <button type="button" className="mx-2 btn btn-primary" onClick={AddMessage}>Go</button>
+                                <button type="button" className="btn btn-primary" onClick={AddMessage}>Go</button>
                             </div>
                         </div>
                     </div>

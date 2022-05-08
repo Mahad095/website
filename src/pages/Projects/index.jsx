@@ -16,10 +16,10 @@ export default function Projects
     <div>
         <ul>
           {
-            projectdetails.map(proj=>
+            projectdetails.map((proj, i)=>
               (
                 <li>
-                  <NavLink to={proj.path}>{proj.name}</NavLink>
+                  <NavLink key={i} to={proj.path}>{proj.name}</NavLink>
                 </li>
               ))
           }
