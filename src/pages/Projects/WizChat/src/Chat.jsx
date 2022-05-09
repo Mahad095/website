@@ -1,9 +1,24 @@
-import React, { useCallback, useRef } from 'react'
-import { useState, useEffect } from 'react'
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
+import React from 'react';
+import { useState, useEffect } from 'react';
+import { 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut, 
+    updateProfile 
+} from 'firebase/auth';
+
 import { auth, db } from './firebase-config';
-import { onSnapshot, query, collection, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import { 
+    onSnapshot,
+    query, 
+    collection, 
+    orderBy, 
+    addDoc, 
+    serverTimestamp 
+} from 'firebase/firestore';
 import './Chat.css'
+
 const messages = collection(db, "messages");
 
 const UserCredential = ()=> 
@@ -27,7 +42,6 @@ const UserCredential = ()=>
             })
             .catch(err => 
             {
-                console.log(err);
                 switch(err.code)
                 {
                     case "auth/user-not-found":
@@ -37,6 +51,9 @@ const UserCredential = ()=>
                     case "auth/wrong-password":
                         alert("You have entered the wrong password.");
                         setpass("");
+                        break;
+                    default:
+                        console.log(err);
                         break;
                 }
             });
@@ -71,6 +88,9 @@ const UserCredential = ()=>
                     case "auth/email-already-in-use":
                         alert("This email is already in use.");
                         setemail("");
+                        break;
+                    default:
+                        console.log(err);
                         break;    
                 }
             });
@@ -175,24 +195,36 @@ export default function Chat() {
             {user && 
                 <div className="container-fluid">
                     <div className="row justify-content-center">
-                        <div className="col-md-6 shadow chatBox">
-                            <div className="bg-primary py-2 stickTop">
-                                <p className="h5 text-white">User : {auth.currentUser?.displayName}</p>
+                        <div className="col-md-6 shadow chatBox px-0">
+                            <div className="bg-primary rounded-top py-3 stickTop d-flex justify-content-between">
+                                <p className="h5 text-white my-auto ms-2"><strong>{auth.currentUser?.displayName}</strong></p>
+                                <button 
+                                    className="btn btn-light me-2 text-secondary"
+                                    onClick={SignOut}
+                                > <strong>Sign Out</strong>
+                                </button>
                             </div>
-                            {
-                                
-                                msgList.map((msg, i)=>
-                                <div key={i} className="py-2 my-3 shadow rounded msg">
-                                    <p className="mx-3 my-auto text-secondary"><strong>{msg.name}</strong></p>
-                                    <p className="mx-3 my-auto text-secondary">{msg.message}</p>
-                                </div>
-                                )
-                            }
-                            <div className="d-flex mt-1 pb-1 stickBottom">
+                            <div className="messagesContainer">
+                                {
+                                    
+                                    msgList.map((msg, i)=>
+                                    <div 
+                                        key={i} 
+                                        className =
+                                        { (msg.name === auth.currentUser?.displayName?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
+                                    >
+                                        <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
+                                        <p className="mx-3 my-auto">{msg.message}</p>
+                                    </div>
+                                    )
+                                }
+                            </div>
+                            <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
                                 <input 
                                     type="text" 
                                     value = {msg} 
                                     onChange = {(e)=>setmsg(e.target.value)} 
+                                    onKeyDown = {(e)=> e.key === "Enter" && AddMessage()}
                                     className="form-control" 
                                     placeholder="Enter message." 
                                     aria-label="write area" 
