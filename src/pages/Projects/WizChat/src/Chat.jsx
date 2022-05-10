@@ -15,7 +15,7 @@ import {
     collection, 
     orderBy, 
     addDoc, 
-    serverTimestamp 
+    serverTimestamp, 
 } from 'firebase/firestore';
 import './Chat.css'
 
@@ -149,6 +149,7 @@ export default function Chat() {
     const [user, setuser] = useState(null);
     const [msgList, setmsgList] = useState([]);
     const [msg, setmsg] = useState("");
+    const [sending, setsending] = useState(false);
     const SignOut = ()=> 
     {
         signOut(auth)
@@ -158,14 +159,18 @@ export default function Chat() {
     const AddMessage = ()=>
     {
         if(msg.length === 0) return;
+        let toSend = msg;
+        setmsg(""); 
+        setsending(true);
         addDoc(messages, 
             {
-                message: msg,
+                message: toSend,
+                uid: auth.currentUser.uid,
                 name: auth.currentUser.displayName,
                 createdAt: serverTimestamp(),
             }
             )
-                .then(()=>{setmsg("")})
+                .then(()=>{setsending(false);})
                 .catch(err=>console.log(err.message));
     }
     useEffect( ()=>
@@ -183,6 +188,12 @@ export default function Chat() {
                 snapshot.docs.forEach((doc)=>
                 {
                         data.push({...doc.data(), id:doc.id});
+                        
+                        // const timeStampDate = doc.data().createdAt;
+                        // const dateInMillis  = timeStampDate.seconds * 1000
+                        // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
+                        
+                        // console.log(date);
                 })
                 setmsgList(data);
             });
@@ -191,53 +202,60 @@ export default function Chat() {
         ,[]);
     return (
         <React.Fragment>
-            {user === null && <UserCredential/>}
-            {user && 
                 <div className="container-fluid">
                     <div className="row justify-content-center">
                         <div className="col-md-6 shadow chatBox px-0">
-                            <div className="bg-primary rounded-top py-3 stickTop d-flex justify-content-between">
-                                <p className="h5 text-white my-auto ms-2"><strong>{auth.currentUser?.displayName}</strong></p>
-                                <button 
-                                    className="btn btn-light me-2 text-secondary"
-                                    onClick={SignOut}
-                                > <strong>Sign Out</strong>
-                                </button>
-                            </div>
-                            <div className="messagesContainer">
-                                {
-                                    
-                                    msgList.map((msg, i)=>
-                                    <div 
-                                        key={i} 
-                                        className =
-                                        { (msg.name === auth.currentUser?.displayName?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
-                                    >
-                                        <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
-                                        <p className="mx-3 my-auto">{msg.message}</p>
+                            {user === null && <UserCredential/>}
+                            {user &&    
+                                <>            
+                                    <div className="bg-primary rounded-top py-3 stickTop d-flex justify-content-between">
+                                        <p className="h5 text-white my-auto ms-2"><strong>{auth.currentUser?.displayName}</strong></p>
+                                        <button 
+                                            className="btn btn-light me-2 text-secondary"
+                                            onClick={SignOut}
+                                        > <strong>Sign Out</strong>
+                                        </button>
                                     </div>
-                                    )
+                                    <div className="messagesContainer">
+                                        { 
+                                            msgList.map((msg, i)=>
+                                            <div 
+                                                key={i} 
+                                                className =
+                                                { (msg.uid === auth.currentUser?.uid?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
+                                            >
+                                                <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
+                                                <p className="mx-3 my-auto">{msg.message}</p>                                        
+                                            </div>
+                                            )
+                                        }
+                                    </div>
+                                    <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
+                                        <input 
+                                            disabled= {sending}
+                                            type="text" 
+                                            value = {msg} 
+                                            onChange = {(e)=>setmsg(e.target.value)} 
+                                            onKeyDown = {(e)=> e.key === "Enter" && AddMessage()}
+                                            className="form-control" 
+                                            placeholder="Enter message." 
+                                            aria-label="write area" 
+                                            aria-describedby="basic-addon1"
+                                        />
+                                        <button 
+                                            disabled= {sending}                                    
+                                            type="button" 
+                                            className="btn btn-primary" 
+                                            onClick={AddMessage}
+                                        >
+                                            Go
+                                            </button>
+                                    </div>
+                                </>
                                 }
                             </div>
-                            <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
-                                <input 
-                                    type="text" 
-                                    value = {msg} 
-                                    onChange = {(e)=>setmsg(e.target.value)} 
-                                    onKeyDown = {(e)=> e.key === "Enter" && AddMessage()}
-                                    className="form-control" 
-                                    placeholder="Enter message." 
-                                    aria-label="write area" 
-                                    aria-describedby="basic-addon1"
-                                />
-                                <button type="button" className="btn btn-primary" onClick={AddMessage}>Go</button>
-                            </div>
-                        </div>
                     </div>
-                </div>
-                
-            }
-            
+                </div>            
         </React.Fragment>
     )
 }
