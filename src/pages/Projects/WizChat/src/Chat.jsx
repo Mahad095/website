@@ -18,7 +18,8 @@ import {
     serverTimestamp, 
 } from 'firebase/firestore';
 import './Chat.css'
-
+import '../../../../index.css'
+import Connection from '../../../../assets/svg/Connection'
 const messages = collection(db, "messages");
 
 const UserCredential = ()=> 
@@ -26,7 +27,7 @@ const UserCredential = ()=>
     const [name, setname] = useState("");
     const [email, setemail] = useState("");
     const [pass, setpass] = useState("");
-    
+    const [shouldSignUp, setshouldSignUp] = useState(false);
     const clearForm = () => 
     {
         setemail("");
@@ -97,48 +98,73 @@ const UserCredential = ()=>
     }
     return (
     <React.Fragment>
-        <div className="container-lg">
-            <div className="row">
-                <div className="col-md-6">
-                    <input 
-                        type="text" 
-                        value = {name} 
-                        onChange = {(e)=>setname(e.target.value)} 
-                        className="form-control my-3" 
-                        placeholder="Username" 
-                        aria-label="username" 
-                        aria-describedby="basic-addon1"
-                    />
+       <div className="container-lg">
+           <div className="row justify-content-center">
+               <div className="col-sm-6 col-lg-4">
+                   <div className="card">
+                       <div className="card-header">
+                           <Connection/>
+                       </div>
+                        <div className='card-body'>
+                            <h4 className='text-center'>{shouldSignUp?"SIGN UP": "SIGN IN"}</h4>
+                            {shouldSignUp && <input 
+                                type="text" 
+                                value = {name} 
+                                onChange = {(e)=>setname(e.target.value)} 
+                                className="form-control mt-3" 
+                                placeholder="Username" 
+                                aria-label="username" 
+                            /> }
+                            <input 
+                                type="text" 
+                                value = {email} 
+                                onChange = {(e)=>setemail(e.target.value)} 
+                                className="form-control mt-3" 
+                                placeholder="Email@wizard.com" 
+                                aria-label="email" 
+                            />
+                            <input 
+                                type="password" 
+                                value = {pass} 
+                                onChange = {(e)=>setpass(e.target.value)} 
+                                className="form-control mt-3" 
+                                placeholder="Password" 
+                                aria-label="password" 
+                            />
+                            {
+                                shouldSignUp
+                                ?
+                                <>
+                                    <button type="button" className="btn btn-primary mt-3" onClick={SignUp}>SignUp</button>
+                                    <p className="text-secondary mt-2">
+                                        Registered? 
+                                        <button 
+                                            className='buttonAsAnchor text-secondary' 
+                                            onClick={()=>setshouldSignUp(false)}
+                                        >
+                                            &nbsp;Sign in here.
+                                        </button>
+                                    </p>
+                                </>
+                                :
+                                <>
+                                    <button type="button" className="btn btn-primary mt-3" onClick={SignIn}>SignIn</button>
+                                    <p className="text-secondary mt-2">
+                                        Not registered? 
+                                        <button 
+                                            className='buttonAsAnchor text-secondary' 
+                                            onClick={()=>setshouldSignUp(true)}
+                                        >
+                                            &nbsp;Click here to sign up.
+                                        </button>
+                                    </p>
+                                </>
+                            }
+                        </div>
+                   </div>
                 </div>
-            </div>
-            <div className="row">
-                <div className="col-md-6">
-                    <input 
-                        type="text" 
-                        value = {email} 
-                        onChange = {(e)=>setemail(e.target.value)} 
-                        className="form-control" 
-                        placeholder="Example123@email.com" 
-                        aria-label="email" 
-                        aria-describedby="basic-addon1"
-                    />
-                </div>
-            </div>
-            <div className="row">
-                <div className="col-md-6">
-                    <input type="password"
-                        value = {pass}
-                        onChange = {(e)=>setpass(e.target.value)}
-                        className="form-control my-3" 
-                        placeholder="Password" 
-                        aria-label="password" 
-                        aria-describedby="basic-addon1"
-                    />
-                </div>
-            </div>          
-            <button type="button" className="me-1 btn btn-primary" onClick={SignIn}>SignIn</button>
-            <button type="button" className="mx-1 btn btn-primary" onClick={SignUp}>Signup</button>
-        </div>
+           </div>
+       </div>
     </React.Fragment>
     )
 }
@@ -202,12 +228,14 @@ export default function Chat() {
         ,[]);
     return (
         <React.Fragment>
+            {
+                user === null
+                ?
+                <UserCredential/>
+                :
                 <div className="container-fluid">
                     <div className="row justify-content-center">
-                        <div className="col-md-6 shadow chatBox px-0">
-                            {user === null && <UserCredential/>}
-                            {user &&    
-                                <>            
+                        <div className="col-md-6 shadow chatBox px-0">       
                                     <div className="bg-primary rounded-top py-3 stickTop d-flex justify-content-between">
                                         <p className="h5 text-white my-auto ms-2"><strong>{auth.currentUser?.displayName}</strong></p>
                                         <button 
@@ -251,11 +279,10 @@ export default function Chat() {
                                             Go
                                             </button>
                                     </div>
-                                </>
-                                }
                             </div>
                     </div>
-                </div>            
+                </div>
+            }            
         </React.Fragment>
     )
 }
