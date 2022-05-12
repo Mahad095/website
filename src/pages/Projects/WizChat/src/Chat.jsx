@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useState, useEffect } from 'react';
 import { 
     signInWithEmailAndPassword, 
@@ -16,6 +16,9 @@ import {
     orderBy, 
     addDoc, 
     serverTimestamp,
+    getDocs,
+    startAfter,
+    limit
 } from 'firebase/firestore';
 import './Chat.css'
 import '../../../../index.css'
@@ -178,6 +181,7 @@ export default function Chat() {
     const [msg, setmsg] = useState("");
     const [sending, setsending] = useState(false);
     const [dataFetched, setdataFetched] = useState(false);
+    const firstDoc = useRef(null);
     const SignOut = ()=> 
     {
         signOut(auth)
@@ -201,6 +205,22 @@ export default function Chat() {
                 .then(()=>{setsending(false);})
                 .catch(err=>console.log(err.message));
     }
+    const FetchOldData = () =>
+    {
+        const q = query(messages, orderBy("createdAt", "desc"), limit(5), startAfter(firstDoc.current));
+        getDocs(q)
+        .then((snapshot) => 
+        {
+            let data = [];
+            firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
+            snapshot.docs.forEach((doc)=>
+            {
+                data.push({...doc.data(), id:doc.id});
+            });
+            setmsgList(data.reverse().concat(msgList));
+        })
+            .catch((err)=>console.log(err));
+    }
     useEffect( ()=>
         {
             const unsubscribeAuth = onAuthStateChanged(auth, (user) => 
@@ -208,27 +228,40 @@ export default function Chat() {
                 setuser(user);
                 console.log(user);
             });    
-            
-            const q = query(messages, orderBy("createdAt", "asc"));
-            // , limit(6), startAfter(firstDoc || 0)
-            const unsubscribeCollection = onSnapshot(q, (snapshot) => 
-            {
-                let data = []
-                snapshot.docs.forEach((doc)=>
+        
+            getDocs(query(messages, orderBy("createdAt", "desc"), limit(5)))
+                .then((snapshot) => 
                 {
-                        data.push({...doc.data(), id:doc.id});
-                        // const timeStampDate = doc.data().createdAt;
-                        // const dateInMillis  = timeStampDate.seconds * 1000
-                        // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
-                        // console.log(date);
-                })
-                if(!dataFetched)
-                {
-                    setdataFetched(true);
-                } 
-                setmsgList(data);
-            });
-            return () => {unsubscribeAuth(); unsubscribeCollection();}
+                    let data = [];
+                    firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
+                    snapshot.docs.forEach((doc)=>
+                    {
+                            data.push({...doc.data(), id:doc.id});
+                    });
+                    
+                    if(!dataFetched)
+                    {
+                        setdataFetched(true);
+                    } 
+                    setmsgList(data.reverse());
+                }
+                )
+                .catch((err)=>console.log(err));                     
+            // const unsubscribeCollection = onSnapshot(query(messages, orderBy("createdAt", "desc"), limit(1)), (snapshot) => 
+            // {
+            //     let data = []
+            //     snapshot.docs.forEach((doc)=>
+            //     {
+            //         data.push({...doc.data(), id:doc.id});
+            //         // const timeStampDate = doc.data().createdAt;
+            //         // const dateInMillis  = timeStampDate.seconds * 1000
+            //         // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
+            //         // console.log(date);
+            //     })
+            //     setmsgList(state=>state.concat(data));
+            // });
+            return () => {unsubscribeAuth(); }
+            // unsubscribeCollection();
         }
         ,[]);
     return (
@@ -258,7 +291,7 @@ export default function Chat() {
                                             </div>
                                         :
                                             <div className="messagesContainer">
-                                                <button>LoadMore</button>
+                                                <button onClick={FetchOldData}>LoadMore</button>
                                             { 
                                                 msgList.map((msg, i)=>
                                                 <div 
