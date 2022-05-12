@@ -15,14 +15,15 @@ import {
     collection, 
     orderBy, 
     addDoc, 
-    serverTimestamp, 
+    serverTimestamp,
 } from 'firebase/firestore';
 import './Chat.css'
 import '../../../../index.css'
 import Connection from '../../../../assets/svg/Connection'
+
 const messages = collection(db, "messages");
 
-const UserCredential = ()=> 
+const UserForm = ()=> 
 {
     const [name, setname] = useState("");
     const [email, setemail] = useState("");
@@ -176,6 +177,7 @@ export default function Chat() {
     const [msgList, setmsgList] = useState([]);
     const [msg, setmsg] = useState("");
     const [sending, setsending] = useState(false);
+    const [dataFetched, setdataFetched] = useState(false);
     const SignOut = ()=> 
     {
         signOut(auth)
@@ -206,21 +208,24 @@ export default function Chat() {
                 setuser(user);
                 console.log(user);
             });    
-
+            
             const q = query(messages, orderBy("createdAt", "asc"));
+            // , limit(6), startAfter(firstDoc || 0)
             const unsubscribeCollection = onSnapshot(q, (snapshot) => 
             {
                 let data = []
                 snapshot.docs.forEach((doc)=>
                 {
                         data.push({...doc.data(), id:doc.id});
-                        
                         // const timeStampDate = doc.data().createdAt;
                         // const dateInMillis  = timeStampDate.seconds * 1000
                         // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
-                        
                         // console.log(date);
                 })
+                if(!dataFetched)
+                {
+                    setdataFetched(true);
+                } 
                 setmsgList(data);
             });
             return () => {unsubscribeAuth(); unsubscribeCollection();}
@@ -231,7 +236,7 @@ export default function Chat() {
             {
                 user === null
                 ?
-                <UserCredential/>
+                    <UserForm/>
                 :
                 <div className="container-fluid">
                     <div className="row justify-content-center">
@@ -244,23 +249,33 @@ export default function Chat() {
                                         > <strong>Sign Out</strong>
                                         </button>
                                     </div>
-                                    <div className="messagesContainer">
-                                        { 
-                                            msgList.map((msg, i)=>
-                                            <div 
-                                                key={i} 
-                                                className =
-                                                { (msg.uid === auth.currentUser?.uid?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
-                                            >
-                                                <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
-                                                <p className="mx-3 my-auto">{msg.message}</p>                                        
+                                    {
+                                        // if the data has not been fetched then display a loading screen else display the data
+                                        !dataFetched
+                                        ?
+                                            <div className="spinner-border text-primary mx-auto my-auto" role="status">
+                                                <span className="visually-hidden">Loading...</span>
                                             </div>
-                                            )
-                                        }
-                                    </div>
+                                        :
+                                            <div className="messagesContainer">
+                                                <button>LoadMore</button>
+                                            { 
+                                                msgList.map((msg, i)=>
+                                                <div 
+                                                    key={i} 
+                                                    className =
+                                                    { (msg.uid === auth.currentUser?.uid?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
+                                                >
+                                                    <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
+                                                    <p className="mx-3 my-auto">{msg.message}</p>                                        
+                                                </div>
+                                                )
+                                            }
+                                            </div>
+                                    }
                                     <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
                                         <input 
-                                            disabled= {sending}
+                                            disabled= {sending || !dataFetched}
                                             type="text" 
                                             value = {msg} 
                                             onChange = {(e)=>setmsg(e.target.value)} 
@@ -271,7 +286,7 @@ export default function Chat() {
                                             aria-describedby="basic-addon1"
                                         />
                                         <button 
-                                            disabled= {sending}                                    
+                                            disabled= {sending || !dataFetched}                                    
                                             type="button" 
                                             className="btn btn-primary" 
                                             onClick={AddMessage}
