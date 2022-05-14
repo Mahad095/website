@@ -1,11 +1,8 @@
 import React, { useRef } from 'react';
 import { useState, useEffect } from 'react';
 import { 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut, 
-    updateProfile 
 } from 'firebase/auth';
 
 import { auth, db } from './firebase-config';
@@ -18,170 +15,23 @@ import {
     serverTimestamp,
     getDocs,
     startAfter,
-    limit
+    limit,
+    where,
+    Timestamp
 } from 'firebase/firestore';
 import './Chat.css'
-import '../../../../index.css'
-import Connection from '../../../../assets/svg/Connection'
+import UserAuth from './UserAuth';
 
 const messages = collection(db, "messages");
-
-const UserForm = ()=> 
-{
-    const [name, setname] = useState("");
-    const [email, setemail] = useState("");
-    const [pass, setpass] = useState("");
-    const [shouldSignUp, setshouldSignUp] = useState(false);
-    const clearForm = () => 
-    {
-        setemail("");
-        setpass("");
-    }
-
-    const SignIn = () =>
-    {
-        signInWithEmailAndPassword(auth, email, pass)
-            .then((userCred)=>
-            {
-                console.log(userCred);
-            })
-            .catch(err => 
-            {
-                switch(err.code)
-                {
-                    case "auth/user-not-found":
-                        alert("There are no users with this email.");
-                        clearForm();
-                        break;
-                    case "auth/wrong-password":
-                        alert("You have entered the wrong password.");
-                        setpass("");
-                        break;
-                    default:
-                        console.log(err);
-                        break;
-                }
-            });
-    }
-
-    const SignUp = () => 
-    {
-        createUserWithEmailAndPassword(auth, email, pass)
-            .then((userCred)=> 
-            {
-                console.log(userCred);
-                updateProfile(auth.currentUser, 
-                    {
-                        displayName : name
-                    })
-                        .then(()=>console.log(userCred))
-                        .catch((err)=>console.log(err.message));
-            })   
-            .catch((err) => 
-            {
-                console.log(err);
-                switch(err.code)
-                {
-                    case "auth/invalid-email":
-                        alert("This email address is invalid.");
-                        setemail("");
-                        break;
-                    case "auth/weak-password":
-                        alert("The Password Should have at least 6 characters.");
-                        setpass("");
-                        break;               
-                    case "auth/email-already-in-use":
-                        alert("This email is already in use.");
-                        setemail("");
-                        break;
-                    default:
-                        console.log(err);
-                        break;    
-                }
-            });
-    }
-    return (
-    <React.Fragment>
-       <div className="container-lg">
-           <div className="row justify-content-center">
-               <div className="col-sm-6 col-lg-4">
-                   <div className="card">
-                       <div className="card-header">
-                           <Connection/>
-                       </div>
-                        <div className='card-body'>
-                            <h4 className='text-center'>{shouldSignUp?"SIGN UP": "SIGN IN"}</h4>
-                            {shouldSignUp && <input 
-                                type="text" 
-                                value = {name} 
-                                onChange = {(e)=>setname(e.target.value)} 
-                                className="form-control mt-3" 
-                                placeholder="Username" 
-                                aria-label="username" 
-                            /> }
-                            <input 
-                                type="text" 
-                                value = {email} 
-                                onChange = {(e)=>setemail(e.target.value)} 
-                                className="form-control mt-3" 
-                                placeholder="Email@wizard.com" 
-                                aria-label="email" 
-                            />
-                            <input 
-                                type="password" 
-                                value = {pass} 
-                                onChange = {(e)=>setpass(e.target.value)} 
-                                className="form-control mt-3" 
-                                placeholder="Password" 
-                                aria-label="password" 
-                            />
-                            {
-                                shouldSignUp
-                                ?
-                                <>
-                                    <button type="button" className="btn btn-primary mt-3" onClick={SignUp}>SignUp</button>
-                                    <p className="text-secondary mt-2">
-                                        Registered? 
-                                        <button 
-                                            className='buttonAsAnchor text-secondary' 
-                                            onClick={()=>setshouldSignUp(false)}
-                                        >
-                                            &nbsp;Sign in here.
-                                        </button>
-                                    </p>
-                                </>
-                                :
-                                <>
-                                    <button type="button" className="btn btn-primary mt-3" onClick={SignIn}>SignIn</button>
-                                    <p className="text-secondary mt-2">
-                                        Not registered? 
-                                        <button 
-                                            className='buttonAsAnchor text-secondary' 
-                                            onClick={()=>setshouldSignUp(true)}
-                                        >
-                                            &nbsp;Click here to sign up.
-                                        </button>
-                                    </p>
-                                </>
-                            }
-                        </div>
-                   </div>
-                </div>
-           </div>
-       </div>
-    </React.Fragment>
-    )
-}
-
 
 
 export default function Chat() {
     const [user, setuser] = useState(null);
     const [msgList, setmsgList] = useState([]);
     const [msg, setmsg] = useState("");
-    const [sending, setsending] = useState(false);
-    const [dataFetched, setdataFetched] = useState(false);
     const firstDoc = useRef(null);
+    const [dataFetched, setdataFetched] = useState(false);
+    
     const SignOut = ()=> 
     {
         signOut(auth)
@@ -193,7 +43,6 @@ export default function Chat() {
         if(msg.length === 0) return;
         let toSend = msg;
         setmsg(""); 
-        setsending(true);
         addDoc(messages, 
             {
                 message: toSend,
@@ -202,74 +51,69 @@ export default function Chat() {
                 createdAt: serverTimestamp(),
             }
             )
-                .then(()=>{setsending(false);})
-                .catch(err=>console.log(err.message));
+            .catch(err=>console.log(err.message));
     }
     const FetchOldData = () =>
     {
-        const q = query(messages, orderBy("createdAt", "desc"), limit(5), startAfter(firstDoc.current));
-        getDocs(q)
-        .then((snapshot) => 
-        {
-            let data = [];
-            firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
-            snapshot.docs.forEach((doc)=>
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(10), startAfter(firstDoc.current)))
+            .then((snapshot) => 
             {
-                data.push({...doc.data(), id:doc.id});
-            });
-            setmsgList(data.reverse().concat(msgList));
-        })
+                let data = [];
+                firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
+                snapshot.docs.forEach((doc)=>
+                {
+                    data.push({...doc.data(), id:doc.id});
+                });
+                if(!dataFetched) setdataFetched(true);
+                setmsgList(data.reverse().concat(msgList));
+            })
             .catch((err)=>console.log(err));
     }
     useEffect( ()=>
+    {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => 
         {
-            const unsubscribeAuth = onAuthStateChanged(auth, (user) => 
+            setuser(user);
+        });    
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(10)))
+            .then((snapshot) => 
             {
-                setuser(user);
-                console.log(user);
-            });    
-        
-            getDocs(query(messages, orderBy("createdAt", "desc"), limit(5)))
-                .then((snapshot) => 
+                let data = [];
+                firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
+                snapshot.docs.forEach((doc)=>
                 {
-                    let data = [];
-                    firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
-                    snapshot.docs.forEach((doc)=>
-                    {
-                            data.push({...doc.data(), id:doc.id});
-                    });
-                    
-                    if(!dataFetched)
-                    {
-                        setdataFetched(true);
-                    } 
-                    setmsgList(data.reverse());
-                }
-                )
-                .catch((err)=>console.log(err));                     
-            // const unsubscribeCollection = onSnapshot(query(messages, orderBy("createdAt", "desc"), limit(1)), (snapshot) => 
-            // {
-            //     let data = []
-            //     snapshot.docs.forEach((doc)=>
-            //     {
-            //         data.push({...doc.data(), id:doc.id});
-            //         // const timeStampDate = doc.data().createdAt;
-            //         // const dateInMillis  = timeStampDate.seconds * 1000
-            //         // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
-            //         // console.log(date);
-            //     })
-            //     setmsgList(state=>state.concat(data));
-            // });
-            return () => {unsubscribeAuth(); }
-            // unsubscribeCollection();
-        }
-        ,[]);
+                    data.push({...doc.data(), id:doc.id});
+                });
+                if(!dataFetched)
+                {
+                    setdataFetched(true);
+                } 
+                setmsgList(data.reverse());
+            })
+            .catch((err)=>console.log(err));
+        const unsubscribeCollection = onSnapshot(query(messages, orderBy("createdAt", "desc"), where("createdAt", ">", Timestamp.now())), (snapshot) => 
+        {
+            let data = []
+            snapshot.docChanges().forEach((change)=>
+            {
+                data.push({...change.doc.data(), id:change.doc.id});
+                // const timeStampDate = doc.data().createdAt;
+                // const dateInMillis  = timeStampDate.seconds * 1000
+                // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
+                // console.log(date);
+            })
+            setmsgList(state=>state.concat(data.reverse()));
+        });
+        console.log("Meow");
+        return () => {unsubscribeAuth(); unsubscribeCollection();}
+    }
+    ,[]);
     return (
         <React.Fragment>
             {
                 user === null
                 ?
-                    <UserForm/>
+                    <UserAuth/>
                 :
                 <div className="container-fluid">
                     <div className="row justify-content-center">
@@ -308,7 +152,6 @@ export default function Chat() {
                                     }
                                     <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
                                         <input 
-                                            disabled= {sending || !dataFetched}
                                             type="text" 
                                             value = {msg} 
                                             onChange = {(e)=>setmsg(e.target.value)} 
@@ -319,7 +162,6 @@ export default function Chat() {
                                             aria-describedby="basic-addon1"
                                         />
                                         <button 
-                                            disabled= {sending || !dataFetched}                                    
                                             type="button" 
                                             className="btn btn-primary" 
                                             onClick={AddMessage}
