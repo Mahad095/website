@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import './Chat.css'
 import UserAuth from './UserAuth';
-
+import ScrollFeed from './ScrollFeed';
 const messages = collection(db, "messages");
 
 
@@ -55,6 +55,7 @@ export default function Chat() {
     }
     const FetchOldData = () =>
     {
+        setdataFetched(false);
         getDocs(query(messages, orderBy("createdAt", "desc"), limit(10), startAfter(firstDoc.current)))
             .then((snapshot) => 
             {
@@ -64,7 +65,7 @@ export default function Chat() {
                 {
                     data.push({...doc.data(), id:doc.id});
                 });
-                if(!dataFetched) setdataFetched(true);
+                setdataFetched(true);
                 setmsgList(data.reverse().concat(msgList));
             })
             .catch((err)=>console.log(err));
@@ -104,7 +105,6 @@ export default function Chat() {
             })
             setmsgList(state=>state.concat(data.reverse()));
         });
-        console.log("Meow");
         return () => {unsubscribeAuth(); unsubscribeCollection();}
     }
     ,[]);
@@ -126,18 +126,18 @@ export default function Chat() {
                                         > <strong>Sign Out</strong>
                                         </button>
                                     </div>
-                                    {
-                                        // if the data has not been fetched then display a loading screen else display the data
-                                        !dataFetched
-                                        ?
-                                            <div className="spinner-border text-primary mx-auto my-auto" role="status">
-                                                <span className="visually-hidden">Loading...</span>
-                                            </div>
-                                        :
-                                            <div className="messagesContainer">
+                                    
+                                            <ScrollFeed className="messagesContainer">
+                                            {/* // if the data has not been fetched then display a loading screen else display the data */}
+                                            {!dataFetched && 
+                                            
+                                                <div className="spinner-border text-primary mx-auto my-auto" role="status">
+                                                    <span className="visually-hidden">Loading...</span>
+                                                </div>
+                                            }
                                                 <button onClick={FetchOldData}>LoadMore</button>
-                                            { 
-                                                msgList.map((msg, i)=>
+                                            
+                                            {    msgList.map((msg, i)=>
                                                 <div 
                                                     key={i} 
                                                     className =
@@ -148,8 +148,7 @@ export default function Chat() {
                                                 </div>
                                                 )
                                             }
-                                            </div>
-                                    }
+                                            </ScrollFeed>
                                     <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
                                         <input 
                                             type="text" 
