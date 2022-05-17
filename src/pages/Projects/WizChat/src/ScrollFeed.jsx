@@ -5,27 +5,38 @@ export default function ScrollFeed({children, className, onNearTop, near}) {
     const scrollRef = useRef(null);
     const container = useRef(null);
     const focused = useRef(null);
+    const height = useRef(0);
     const isAtBottom = () => container.current.scrollTop  == (container.current.scrollHeight - container.current.offsetHeight); 
     const isNearTop = (nearValue) => container.current.scrollTop <= nearValue * container.current.scrollHeight;
     useEffect(
         ()=>{
             scrollRef.current?.scrollIntoView({behaviour : 'smooth'});
+            height.current = container.current.scrollHeight;
         }, [scrollRef.current]);
     useEffect(
         ()=>{
             if(focused.current) scrollRef.current?.scrollIntoView({behaviour : 'smooth'});
+            // else
+            // {
+            //     if(container.current && height.current !== container.current.scrollHeight)
+            //     {
+            //         console.log("This");
+            //         container.current.scroll({top:container.current.scrollHeight - height.current, behaviour:"smooth"});
+            //         height.current = container.current.scrollHeight;
+            //     }
+            // }
         });
-    const handleScroll = () =>
+    const handleScroll = async () =>
         {
             if(!isAtBottom()) focused.current = false;
             else focused.current = true;
             if(container.current !== null)
             {
-                if(isAtBottom()) scrollRef.current?.scrollIntoView({behaviour : 'smooth'});
-                else if (isNearTop(near)) 
+                if (isNearTop(near)) 
                 {
-                    onNearTop();
-                    container.current.scroll({top:0.5 * container.current.scrollHeight});
+                    await onNearTop();
+                    container.current.scroll({top:container.current.scrollHeight - height.current, behaviour:"smooth"});
+                    console.log("Second")
                 }
             }
         }

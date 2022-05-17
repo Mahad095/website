@@ -59,6 +59,7 @@ export default function Chat() {
         getDocs(query(messages, orderBy("createdAt", "desc"), limit(10), startAfter(firstDoc.current)))
             .then((snapshot) => 
             {
+                if(snapshot.docs.length < 10) return;
                 let data = [];
                 firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
                 snapshot.docs.forEach((doc)=>
@@ -67,6 +68,7 @@ export default function Chat() {
                 });
                 setdataFetched(true);
                 setmsgList(data.reverse().concat(msgList));
+                console.log("First");
             })
             .catch((err)=>console.log(err));
     }
