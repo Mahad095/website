@@ -127,16 +127,14 @@ export default function Chat() {
                                         </button>
                                     </div>
                                     
-                                            <ScrollFeed className="messagesContainer">
+                                            <ScrollFeed className="messagesContainer" onNearTop={()=>FetchOldData()} near={0} >
                                             {/* // if the data has not been fetched then display a loading screen else display the data */}
                                             {!dataFetched && 
                                             
-                                                <div className="spinner-border text-primary mx-auto my-auto" role="status">
+                                                <div className="spinner-border text-primary mx-auto my-auto " role="status">
                                                     <span className="visually-hidden">Loading...</span>
                                                 </div>
-                                            }
-                                                <button onClick={FetchOldData}>LoadMore</button>
-                                            
+                                            }                                            
                                             {    msgList.map((msg, i)=>
                                                 <div 
                                                     key={i} 
