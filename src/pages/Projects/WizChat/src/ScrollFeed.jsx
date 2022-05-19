@@ -7,6 +7,7 @@ export class ScrollFeed extends Component {
         this.container = React.createRef(null);
         this.focus = true;
         this.prevScrollValue = 0;
+        this.previousHeight = 0;
     }
     scroll = (topValue) =>
     {
@@ -36,20 +37,26 @@ export class ScrollFeed extends Component {
     {
         return this.container.current.scrollTop === 0;
     }
-    didScrollUp = () =>
+    handleScroll = () =>
     {
-        if(this.prevScrollValue < this.container.current.scrollTop)
+        if(this.prevScrollValue  < this.container.current.scrollTop)
         {
             this.prevScrollValue = this.container.current.scrollTop;
             this.focus = false;
         }
+        if(this.isAtTop()) this.props.onTop(); 
     }
     componentDidMount()
     {
-        this.container.current.addEventListener("scroll", this.didScrollUp);
+        this.container.current.addEventListener("scroll", this.handleScroll);
     }
     componentDidUpdate()
     {
+        if(this.previousHeight !== this.container.current.scrollHeight)
+        {
+            this.scroll(this.container.current.scrollHeight - this.previousHeight);
+            this.previousHeight = this.container.current.scrollHeight;
+        }
         if(this.isAtBottom()) this.focus = true;
         if(this.focus)
         {

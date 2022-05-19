@@ -55,7 +55,7 @@ export default function Chat() {
             .catch(err=>console.log(err.message));
     }
     const FetchOldData = () =>
-    {
+    {   
         setdataFetched(false);
         getDocs(query(messages, orderBy("createdAt", "desc"), limit(10), startAfter(firstDoc.current)))
             .then((snapshot) => 
@@ -68,6 +68,7 @@ export default function Chat() {
                     data.push({...doc.data(), id:doc.id});
                 });
                 setdataFetched(true);
+
                 setmsgList(data.reverse().concat(msgList));
             })
             .catch((err)=>console.log(err));
@@ -107,6 +108,7 @@ export default function Chat() {
                 // console.log(date);
             })
             setmsgList(state=>state.concat(data.reverse()));
+            scroller.current.scrollToBottom();
         });
         return () => {unsubscribeAuth(); unsubscribeCollection();}
     }
@@ -132,11 +134,11 @@ export default function Chat() {
                                     
                                             {!dataFetched && 
                                             
-                                                <div className="spinner-border text-primary mx-auto my-auto " role="status">
+                                                <div className="spinner-border text-primary mx-auto h-25" role="status">
                                                     <span className="visually-hidden">Loading...</span>
                                                 </div>
                                             }                                            
-                                            <ScrollFeed ref = {scroller} className="messagesContainer" onNearTop={()=>FetchOldData()} near={0} >
+                                            <ScrollFeed ref = {scroller} className="messagesContainer" onTop={FetchOldData} near={0} >
                                             {/* // if the data has not been fetched then display a loading screen else display the data */}
                                             {    msgList.map((msg, i)=>
                                                 <div 
