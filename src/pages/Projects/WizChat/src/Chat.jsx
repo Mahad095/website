@@ -30,6 +30,7 @@ export default function Chat() {
     const [msgList, setmsgList] = useState([]);
     const [msg, setmsg] = useState("");
     const firstDoc = useRef(null);
+    const scroller = useRef(null);
     const [dataFetched, setdataFetched] = useState(false);
     
     const SignOut = ()=> 
@@ -68,7 +69,6 @@ export default function Chat() {
                 });
                 setdataFetched(true);
                 setmsgList(data.reverse().concat(msgList));
-                console.log("First");
             })
             .catch((err)=>console.log(err));
     }
@@ -92,6 +92,7 @@ export default function Chat() {
                     setdataFetched(true);
                 } 
                 setmsgList(data.reverse());
+                scroller.current.scrollToBottom();
             })
             .catch((err)=>console.log(err));
         const unsubscribeCollection = onSnapshot(query(messages, orderBy("createdAt", "desc"), where("createdAt", ">", Timestamp.now())), (snapshot) => 
@@ -129,14 +130,14 @@ export default function Chat() {
                                         </button>
                                     </div>
                                     
-                                            <ScrollFeed className="messagesContainer" onNearTop={()=>FetchOldData()} near={0} >
-                                            {/* // if the data has not been fetched then display a loading screen else display the data */}
                                             {!dataFetched && 
                                             
                                                 <div className="spinner-border text-primary mx-auto my-auto " role="status">
                                                     <span className="visually-hidden">Loading...</span>
                                                 </div>
                                             }                                            
+                                            <ScrollFeed ref = {scroller} className="messagesContainer" onNearTop={()=>FetchOldData()} near={0} >
+                                            {/* // if the data has not been fetched then display a loading screen else display the data */}
                                             {    msgList.map((msg, i)=>
                                                 <div 
                                                     key={i} 
