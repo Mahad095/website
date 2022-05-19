@@ -11,6 +11,7 @@
 .stickBottom{
     position: sticky;
     bottom: 0;
+    top:100%;
 }
 .stickTop{
     position: sticky;

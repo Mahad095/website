@@ -26,3 +26,8 @@ body {
   text-decoration: underline;
   cursor: pointer;
 }
+
+button, input
+{
+  outline: none !important;
+}

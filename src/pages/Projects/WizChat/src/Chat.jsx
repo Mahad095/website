@@ -134,8 +134,10 @@ export default function Chat() {
                                     
                                             {!dataFetched && 
                                             
-                                                <div className="spinner-border text-primary mx-auto h-25" role="status">
-                                                    <span className="visually-hidden">Loading...</span>
+                                                <div className="d-flex justify-content-center my-auto">
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        <span className="sr-only">Loading...</span>
+                                                    </div>
                                                 </div>
                                             }                                            
                                             <ScrollFeed ref = {scroller} className="messagesContainer" onTop={FetchOldData} near={0} >
@@ -144,7 +146,7 @@ export default function Chat() {
                                                 <div 
                                                     key={i} 
                                                     className =
-                                                    { (msg.uid === auth.currentUser?.uid?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary") + "py-2 my-3 shadow rounded msg"}                                    
+                                                    { (msg.uid === auth.currentUser?.uid?"msgBySelfUser me-2 text-white ":"ms-2 text-secondary ") + "py-2 my-3 shadow rounded msg"}                                    
                                                 >
                                                     <p className="mx-3 my-auto"><strong>{msg.name}</strong></p>
                                                     <p className="mx-3 my-auto">{msg.message}</p>                                        
