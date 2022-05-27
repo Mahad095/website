@@ -56,11 +56,15 @@ export default function Chat() {
     }
     const FetchOldData = () =>
     {   
+        if(!dataFetched) return;
         setdataFetched(false);
-        getDocs(query(messages, orderBy("createdAt", "desc"), limit(10), startAfter(firstDoc.current)))
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(25), startAfter(firstDoc.current)))
             .then((snapshot) => 
             {
-                if(snapshot.docs.length < 10) return;
+                if(snapshot.docs.length == 0)
+                {
+                    return;
+                }
                 let data = [];
                 firstDoc.current = snapshot.docs[snapshot.docs.length - 1];
                 snapshot.docs.forEach((doc)=>
@@ -69,7 +73,7 @@ export default function Chat() {
                 });
                 setdataFetched(true);
 
-                setmsgList(data.reverse().concat(msgList));
+                setmsgList(state=> state.concat(data));
             })
             .catch((err)=>console.log(err));
     }
@@ -79,7 +83,7 @@ export default function Chat() {
         {
             setuser(user);
         });    
-        getDocs(query(messages, orderBy("createdAt", "desc"), limit(10)))
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(25)))
             .then((snapshot) => 
             {
                 let data = [];
@@ -92,8 +96,7 @@ export default function Chat() {
                 {
                     setdataFetched(true);
                 } 
-                setmsgList(data.reverse());
-                scroller.current.scrollToBottom();
+                setmsgList(data);
             })
             .catch((err)=>console.log(err));
         const unsubscribeCollection = onSnapshot(query(messages, orderBy("createdAt", "desc"), where("createdAt", ">", Timestamp.now())), (snapshot) => 
@@ -107,8 +110,7 @@ export default function Chat() {
                 // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString();
                 // console.log(date);
             })
-            setmsgList(state=>state.concat(data.reverse()));
-            scroller.current.scrollToBottom();
+            setmsgList(state=>data.concat(state));
         });
         return () => {unsubscribeAuth(); unsubscribeCollection();}
     }
@@ -136,11 +138,11 @@ export default function Chat() {
                                             
                                                 <div className="d-flex justify-content-center my-auto">
                                                     <div className="spinner-border text-primary" role="status">
-                                                        <span className="sr-only">Loading...</span>
+                                                        {/* <span className="sr-only">Loading...</span> */}
                                                     </div>
                                                 </div>
                                             }                                            
-                                            <ScrollFeed ref = {scroller} className="messagesContainer" onTop={FetchOldData} near={0} >
+                                            <ScrollFeed ref = { scroller } className = "messagesContainer" onBottom = { FetchOldData } near = { 0.75 } > {/** The flex direction is set as column reverse. This reverses the behaviour of scroll. Top becomes bottom and viceversa. Thats why i have used onBottom instead onTop */}
                                             {/* // if the data has not been fetched then display a loading screen else display the data */}
                                             {    msgList.map((msg, i)=>
                                                 <div 

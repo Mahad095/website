@@ -27,46 +27,51 @@ export class ScrollFeed extends Component {
     }
     scrollTop = () =>
     {
-        return this.container.current.scrollTop;
+        return Math.abs(this.container.current.scrollTop);
     }
-    isAtBottom = () =>
+    isAtBottom = (Near) =>
     {
-        return this.container.current.scrollTop  === (this.container.current.scrollHeight - this.container.current.offsetHeight);
+        // console.log("value: ",(this.container.current.scrollHeight - this.container.current.offsetHeight) * Near)
+        return this.scrollTop()  >= ((this.container.current.scrollHeight - this.container.current.offsetHeight) * Near);
     }
     isAtTop = () =>
     {
-        return this.container.current.scrollTop === 0;
+        return this.scrollTop() === 0;
     }
     handleScroll = () =>
     {
-        if(this.prevScrollValue  < this.container.current.scrollTop)
-        {
-            this.prevScrollValue = this.container.current.scrollTop;
-            this.focus = false;
-        }
-        if(this.isAtTop()) this.props.onTop(); 
+        console.log(this.scrollTop());
+        // console.log(this.isAtBottom(this.props.near));
+
+        // console.log(this.container.current.scrollHeight - this.container.current.offsetHeight);
+        // if(this.prevScrollValue  < this.container.current.scrollTop)
+        // {
+        //     this.prevScrollValue = this.container.current.scrollTop;
+        //     this.focus = false;
+        // }
+        if(this.isAtBottom(this.props.near)) this.props.onBottom(); 
     }
     componentDidMount()
     {
         this.container.current.addEventListener("scroll", this.handleScroll);
     }
-    componentDidUpdate()
-    {
-        if(this.previousHeight !== this.container.current.scrollHeight)
-        {
-            this.scroll(this.container.current.scrollHeight - this.previousHeight);
-            this.previousHeight = this.container.current.scrollHeight;
-        }
-        if(this.isAtBottom()) this.focus = true;
-        if(this.focus)
-        {
+    // componentDidUpdate()
+    // {
+    //     if(this.previousHeight !== this.container.current.scrollHeight)
+    //     {
+    //         this.scroll(this.container.current.scrollHeight - this.previousHeight);
+    //         this.previousHeight = this.container.current.scrollHeight;
+    //     }
+    //     if(this.isAtBottom()) this.focus = true;
+    //     if(this.focus)
+    //     {
         
-            this.scrollToBottom();
-        } 
-    }  
+    //         this.scrollToBottom();
+    //     } 
+    // }  
     componentWillUnmount()
     {
-        this.container.current.removeEventListener("scroll", this.didScrollUp);
+        this.container.current.removeEventListener("scroll", this.handleScroll);
     }
     render() {
         return (
