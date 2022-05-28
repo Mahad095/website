@@ -26,12 +26,16 @@ const messages = collection(db, "messages");
 
 
 export default function Chat() {
-    const [user, setuser] = useState(null);
-    const [msgList, setmsgList] = useState([]);
-    const [msg, setmsg] = useState("");
-    const firstDoc = useRef(null);
-    const scroller = useRef(null);
-    const [dataFetched, setdataFetched] = useState(false);
+
+    const [user, setuser] = useState(null); /* State representing auth changes */
+    const [msgList, setmsgList] = useState([]); /* All messages */
+    const [msg, setmsg] = useState(""); /* Used for input */
+    const firstDoc = useRef(null);  /* Used for pagination purposes */
+    const scroller = useRef(null);  /* The reference used for the ScrollFeed component */
+    const endOfChat = useRef(false);    /* A bool variable which is set to true when user scrolls to the first message ever stored */
+    const [dataFetched, setdataFetched] = useState(false); /* A bool state variable to display a loading icon when data is being fetched */
+    const SCROLL_RATIO_NEEDED_TO_FETCH = 0.6 /* When Scrolled at least 0.6 * scrollHeight, more data is fetched*/
+    const FETCH_LIMIT = 25 /* number of messages to be fetched at a time */
     
     const SignOut = ()=> 
     {
@@ -39,7 +43,7 @@ export default function Chat() {
             .then(()=>console.log("User Signed out"))
             .catch((err)=>console.log(err.message));
     }
-    const AddMessage = ()=>
+    const AddMessage = (e)=>
     {
         if(msg.length === 0) return;
         let toSend = msg;
@@ -56,13 +60,16 @@ export default function Chat() {
     }
     const FetchOldData = () =>
     {   
+        if(endOfChat.current) return;
         if(!dataFetched) return;
         setdataFetched(false);
-        getDocs(query(messages, orderBy("createdAt", "desc"), limit(25), startAfter(firstDoc.current)))
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(FETCH_LIMIT), startAfter(firstDoc.current)))
             .then((snapshot) => 
             {
-                if(snapshot.docs.length == 0)
+                if(snapshot.docs.length === 0)
                 {
+                    endOfChat.current = true;
+                    setdataFetched(true);
                     return;
                 }
                 let data = [];
@@ -83,7 +90,7 @@ export default function Chat() {
         {
             setuser(user);
         });    
-        getDocs(query(messages, orderBy("createdAt", "desc"), limit(25)))
+        getDocs(query(messages, orderBy("createdAt", "desc"), limit(FETCH_LIMIT)))
             .then((snapshot) => 
             {
                 let data = [];
@@ -132,18 +139,9 @@ export default function Chat() {
                                             onClick={SignOut}
                                         > <strong>Sign Out</strong>
                                         </button>
-                                    </div>
-                                    
-                                            {!dataFetched && 
-                                            
-                                                <div className="d-flex justify-content-center my-auto">
-                                                    <div className="spinner-border text-primary" role="status">
-                                                        {/* <span className="sr-only">Loading...</span> */}
-                                                    </div>
-                                                </div>
-                                            }                                            
-                                            <ScrollFeed ref = { scroller } className = "messagesContainer" onBottom = { FetchOldData } near = { 0.75 } > {/** The flex direction is set as column reverse. This reverses the behaviour of scroll. Top becomes bottom and viceversa. Thats why i have used onBottom instead onTop */}
-                                            {/* // if the data has not been fetched then display a loading screen else display the data */}
+                                    </div>                                
+                                            <ScrollFeed ref = { scroller } className = "messagesContainer" onBottom = { FetchOldData } near = { SCROLL_RATIO_NEEDED_TO_FETCH } > {/** The flex direction is set as column reverse. This reverses the behaviour of scroll. Top becomes bottom and viceversa. Thats why i have used onBottom instead onTop */}
+                                            {/* // if the data has not been fetched then display a loading screen else display the data */}   
                                             {    msgList.map((msg, i)=>
                                                 <div 
                                                     key={i} 
@@ -155,6 +153,14 @@ export default function Chat() {
                                                 </div>
                                                 )
                                             }
+                                            {
+                                                !dataFetched && 
+                                                <div className="d-flex justify-content-center my-auto">
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        {/* <span className="sr-only">Loading...</span> */}
+                                                    </div>
+                                                </div>
+                                            }         
                                             </ScrollFeed>
                                     <div className="d-flex mt-1 pb-1 mx-2 stickBottom">
                                         <input 

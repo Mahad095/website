@@ -31,7 +31,6 @@ export class ScrollFeed extends Component {
     }
     isAtBottom = (Near) =>
     {
-        // console.log("value: ",(this.container.current.scrollHeight - this.container.current.offsetHeight) * Near)
         return this.scrollTop()  >= ((this.container.current.scrollHeight - this.container.current.offsetHeight) * Near);
     }
     isAtTop = () =>
@@ -40,15 +39,6 @@ export class ScrollFeed extends Component {
     }
     handleScroll = () =>
     {
-        console.log(this.scrollTop());
-        // console.log(this.isAtBottom(this.props.near));
-
-        // console.log(this.container.current.scrollHeight - this.container.current.offsetHeight);
-        // if(this.prevScrollValue  < this.container.current.scrollTop)
-        // {
-        //     this.prevScrollValue = this.container.current.scrollTop;
-        //     this.focus = false;
-        // }
         if(this.isAtBottom(this.props.near)) this.props.onBottom(); 
     }
     componentDidMount()

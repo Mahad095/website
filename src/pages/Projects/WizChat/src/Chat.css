@@ -16,6 +16,7 @@
 .stickTop{
     position: sticky;
     top: 0;
+    bottom: 100%;
 }
 .messagesContainer{
     display: flex;
